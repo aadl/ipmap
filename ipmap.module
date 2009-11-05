@@ -1,0 +1,7 @@
+<?php
+// $Id$
+/**
+ * ipmap module providing ip to label mapping interface and resolution
+ * @author Ryan Eby
+ * @author Eric Klooster
+ */

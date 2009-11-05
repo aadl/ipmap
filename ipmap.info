@@ -1,0 +1,4 @@
+; $Id$
+name = "IP to label"
+description = "Maps and IP or IP range to a textual label that other modules can use for logic in regards to display or permissions."
+core = 6.x
