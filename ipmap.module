@@ -5,3 +5,29 @@
  * @author Ryan Eby
  * @author Eric Klooster
  */
+
+/**
+ * Display help and module information
+ *
+ * @param string $path Which path of the site we're displaying help
+ * @param array $arg Array that holds the current path as would be returned from arg() function
+ * @return string help text for the path
+ */
+function ipmap_help($path, $arg) {
+  $output = '';
+  switch ($path) {
+    case "admin/help#ipmap":
+      $output = '<p>'.  t("ip to label mapping interface and resolution") .'</p>';
+      break;
+  }
+  return $output;
+}
+ 
+/**
+ * Valid permissions for this module
+ *
+ * @return array An array of valid permissions for the sopac module
+ */
+function ipmap_perm() {
+  return array('administer ipmap');
+}
