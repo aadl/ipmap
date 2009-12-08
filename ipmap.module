@@ -31,3 +31,27 @@ function ipmap_help($path, $arg) {
 function ipmap_perm() {
   return array('administer ipmap');
 }
+
+function ipmap_init() {
+  require_once('ip_in_range.php'); // someone already did all the hard work
+  $ip = $_SERVER['REMOTE_ADDR']; //don't care about proxies right now
+
+  $labels = array();
+  $ranges = array('192.168.*.*' => 'internal','10.0.*.*' => 'internal', '192.168.100.0/24' => 'DMZ');
+
+  foreach($ranges as $range => $label){
+    $result = ip_in_range($ip,$range);
+    if($result) { $labels[] = $label; }
+  }
+
+  if(empty($labels)) { $labels[] = "external"; } // right now we label everything else external. may add geolocation later
+  
+  if(!isset($_SESSION['ipmap']))
+    {
+    $_SESSION['ipmap'] = array(); // drupal requires an array. make sure it is typed right
+    }
+
+  $ipmap = & $_SESSION['ipmap'];
+  $ipmap = $labels;
+  
+}
