@@ -32,26 +32,58 @@ function ipmap_perm() {
   return array('administer ipmap');
 }
 
+function ipmap_menu() {
+  $items['admin/settings/ipmap'] = array(
+    'title' => t('ipmap Settings'),
+    'description' => 'Settings for IP Map',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ipmap_settings'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  
+  return $items;
+}
+
+function ipmap_settings() {
+  $form['ipmap_ranges'] = array(
+    '#type' => 'textfield',
+    '#title' => t("IP Map Ranges"),
+    '#default_value' => variable_get('ipmap_ranges', NULL),
+    '#size' => 64,
+    '#maxlength' => 256,
+    '#description' => t("IP Ranges and their assigned labels in the format [IP RANGE]:[Label],[IP RANGE]:[Label], etc."),
+  );
+  return system_settings_form($form);
+}
+
 function ipmap_init() {
   require_once('ip_in_range.php'); // someone already did all the hard work
   $ip = $_SERVER['REMOTE_ADDR']; //don't care about proxies right now
 
-  $labels = array();
-  $ranges = array('192.168.*.*' => 'internal','10.0.*.*' => 'internal', '192.168.100.0/24' => 'DMZ');
-
-  foreach($ranges as $range => $label){
-    $result = ip_in_range($ip,$range);
-    if($result) { $labels[] = $label; }
-  }
-
-  if(empty($labels)) { $labels[] = "external"; } // right now we label everything else external. may add geolocation later
-  
-  if(!isset($_SESSION['ipmap']))
-    {
-    $_SESSION['ipmap'] = array(); // drupal requires an array. make sure it is typed right
+  if ($ipmap_ranges = variable_get('ipmap_ranges', NULL)) {
+    $rangepairs = explode(',', $ipmap_ranges);
+    $labels = array();
+    
+    foreach ($rangepairs as $rangepair) {
+      $rangepair = explode(':', $rangepair); // e.g. "IP Range:Label"
+      $range = $rangepair[0];
+      $label = $rangepair[1];
+      
+      if (ip_in_range($ip, $range)) {
+        $labels[] = $label;
+      }
     }
+  }
+  
+  if (empty($labels)) {
+    $labels[] = "external"; // right now we label everything else external. may add geolocation later
+  } 
+  
+  if (!isset($_SESSION['ipmap'])) {
+    $_SESSION['ipmap'] = array(); // drupal requires an array. make sure it is typed right
+  }
 
   $ipmap = & $_SESSION['ipmap'];
   $ipmap = $labels;
-  
 }
